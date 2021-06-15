@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"name": "arduinoTX",
+			"path": "arduinoTX"
+		},
+		{
+			"name": "arduinoRX",
+			"path": "arduinoRX"
+		},
+		{
+			"path": "."
+		}
+	],
+	"settings": {}
+}
