@@ -1,9 +1,11 @@
 #include <Arduino.h>
+int led = 13;
 
 void setup()
 {
   // put your setup code here, to run once:
   Serial.begin(9600);
+  pinMode(led, INPUT);
 }
 
 int ranVal1;
@@ -19,5 +21,11 @@ void loop()
   String res = String(ranVal1) + ";" + String(ranVal2) + ";" + String(ranVal3);
   // put your main code here, to run repeatedly:
   Serial.println(res);
-  delay(1000);
+  for (int i = 0; i < 3; i++)
+  {
+    digitalWrite(led, HIGH);
+    delay(250);
+    digitalWrite(led, LOW);
+    delay(250);
+  }
 }
