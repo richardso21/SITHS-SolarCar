@@ -1,12 +1,17 @@
 #include "main.hpp"
 TinyGPSPlus gps;
-AltSoftSerial gpsSerial; // pins 8 (RX), 9 (TX)
+AltSoftSerial loraSerial; //pins 8, 9, unusable 10
+NeoSWSerial gpsSerial(2, 3);
+
+void sendData(String data);
 
 void setup()
 {
+  // TODO: lora on AltSS, gps on SS
+
   // lora on hardware serial
-  Serial.begin(115200);
-  Serial.print("AT+PARAMETER=12,4,1,7\r\n");
+  loraSerial.begin(115200);
+  loraSerial.print("AT+PARAMETER=12,4,1,7\r\n");
   // gps on alt SS
   gpsSerial.begin(9600);
 }
@@ -14,7 +19,6 @@ void setup()
 String msgTX;
 String datetime;
 double speed;
-int dataSize;
 
 void loop()
 {
@@ -29,12 +33,19 @@ void loop()
       speed = gps.speed.mph();
     if (gps.time.isValid() && gps.date.isValid())
       datetime = String(gps.date.value()) + String(gps.time.value());
+      // DDMMYYHHmmSSCC
 
     msgTX = String(speed) + ";" + datetime;
     // 2 (speed) + 14 (datetime) + 1 (;) = 27 bytes
 
-    dataSize = msgTX.length();
-    Serial.print("AT+SEND=0," + String(dataSize) + "," + msgTX + "\r\n");
+    sendData(msgTX);
     delay(1000);
   }
+}
+
+// sends string data to lora radio
+void sendData(String data)
+{
+  int dataSize = data.length();
+  loraSerial.print("AT+SEND=0," + String(dataSize) + "," + data + "\r\n");
 }

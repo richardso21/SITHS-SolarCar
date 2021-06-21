@@ -1,10 +1,12 @@
 #include "main.hpp"
 LiquidCrystal_I2C lcd(0x27, 20, 4);
+AltSoftSerial loraSerial;
 
 void setup()
 {
-  Serial.begin(115200);
-  Serial.print("AT+PARAMETER=12,4,1,7\r\n");
+  Serial.begin(9600);
+  loraSerial.begin(115200);
+  loraSerial.print("AT+PARAMETER=12,4,1,7\r\n");
   lcd.init();
   lcd.backlight();
 }
@@ -13,10 +15,11 @@ String msgRX;
 
 void loop()
 {
-  if (Serial.available())
+  if (loraSerial.available())
   {
-    msgRX = Serial.readString();
+    msgRX = loraSerial.readString();
     lcd.clear();
     lcd.println(msgRX);
+    Serial.println(msgRX);
   }
 }
