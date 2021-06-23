@@ -1,12 +1,12 @@
 #include "main.hpp"
 TinyGPSPlus gps;
-AltSoftSerial gpsSerial; // pins 8 (RX), 9 (TX)
+SoftwareSerial gpsSerial(8, 9); // pins 8 (RX), 9 (TX)
 
 void setup()
 {
   // lora on hardware serial
   Serial.begin(115200);
-  Serial.print("AT+PARAMETER=12,4,1,7\r\n");
+  // Serial.print("AT+PARAMETER=12,4,1,7\r\n");
   // gps on alt SS
   gpsSerial.begin(9600);
 }
@@ -15,6 +15,8 @@ String msgTX;
 String datetime;
 double speed;
 int dataSize;
+int clk = 0;
+int seconds = 0;
 
 void loop()
 {
@@ -31,10 +33,14 @@ void loop()
       datetime = String(gps.date.value()) + String(gps.time.value());
 
     msgTX = String(speed) + ";" + datetime;
-    // 2 (speed) + 14 (datetime) + 1 (;) = 27 bytes
 
     dataSize = msgTX.length();
     Serial.print("AT+SEND=0," + String(dataSize) + "," + msgTX + "\r\n");
-    delay(1000);
+
+    if (clk) clk--;
+    else clk++;
+
+    // no idea why 1 second delay breaks
+    delay(2000);
   }
 }

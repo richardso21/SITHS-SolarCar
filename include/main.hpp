@@ -5,3 +5,4 @@
 #include <AltSoftSerial.h>
 #include <LiquidCrystal_I2C.h>
 #include <TinyGPS++.h>
+#include <SoftwareSerial.h>
