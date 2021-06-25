@@ -5,4 +5,6 @@
 #include <AltSoftSerial.h>
 #include <LiquidCrystal_I2C.h>
 #include <TinyGPS++.h>
-#include <SoftwareSerial.h>
+#include <NeoSWSerial.h>
+#include <TimeLib.h>
+

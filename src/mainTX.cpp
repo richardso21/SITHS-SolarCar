@@ -1,22 +1,24 @@
 #include "main.hpp"
 TinyGPSPlus gps;
-SoftwareSerial gpsSerial(8, 9); // pins 8 (RX), 9 (TX)
+AltSoftSerial gpsSerial; //pins 8, 9, unusable 10
+NeoSWSerial loraSerial(2, 3);
+
+String getDataFromGPS();
+void sendData(String data);
 
 void setup()
 {
-  // lora on hardware serial
-  Serial.begin(115200);
-  // Serial.print("AT+PARAMETER=12,4,1,7\r\n");
-  // gps on alt SS
+  Serial.begin(9600);
+  // initiate lora and GPS serial coms
+  loraSerial.begin(9600);
   gpsSerial.begin(9600);
 }
 
-String msgTX;
-String datetime;
+String msgBatch;
+int n = 0;
+String DT;
 double speed;
-int dataSize;
-int clk = 0;
-int seconds = 0;
+int prevSec = -1;
 
 void loop()
 {
@@ -24,23 +26,51 @@ void loop()
   while (gpsSerial.available())
   {
     // encode gps serial data
-    gps.encode(gpsSerial.read());
+    if (gps.encode(gpsSerial.read()))
+    {
+      // ignore data if on same second
+      if (gps.time.isValid() && gps.time.second() == prevSec)
+        continue;
+      prevSec = gps.time.second();
 
-    // get speed and datetime from gps
-    if (gps.speed.isValid())
-      speed = gps.speed.mph();
-    if (gps.time.isValid() && gps.date.isValid())
-      datetime = String(gps.date.value()) + String(gps.time.value());
-
-    msgTX = String(speed) + ";" + datetime;
-
-    dataSize = msgTX.length();
-    Serial.print("AT+SEND=0," + String(dataSize) + "," + msgTX + "\r\n");
-
-    if (clk) clk--;
-    else clk++;
-
-    // no idea why 1 second delay breaks
-    delay(2000);
+      // get data from GPS
+      String msg = getDataFromGPS();
+      Serial.println(msg);
+      msgBatch += msg + ":";
+      n++;
+    }
+    // send 4-second batch of data
+    if (n >= 4)
+    {
+      sendData(msgBatch);
+      msgBatch = "";
+      n = 0;
+    }
   }
+}
+
+// get speed and datetime from gps
+String getDataFromGPS()
+{
+  if (!(gps.speed.isValid() && gps.date.isValid()))
+    return "ERR!";
+
+  double speed = gps.speed.mph();
+  setTime(gps.time.hour(),
+          gps.time.minute(),
+          gps.time.second(),
+          gps.date.day(),
+          gps.date.month(),
+          gps.date.year());
+  time_t timedelta = now();
+  return String(speed) + ";" + String(timedelta);
+}
+
+// sends string data to lora radio
+void sendData(String data)
+{
+  digitalWrite(13, HIGH);
+  int dataSize = data.length();
+  loraSerial.print("AT+SEND=0," + String(dataSize) + "," + data + "\r\n");
+  digitalWrite(13, LOW);
 }
