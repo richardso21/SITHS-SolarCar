@@ -12,7 +12,6 @@ void setup()
   // initiate lora and GPS serial coms
   loraSerial.begin(9600);
   gpsSerial.begin(9600);
-  pinMode(13, OUTPUT);
 }
 
 String msgBatch;
