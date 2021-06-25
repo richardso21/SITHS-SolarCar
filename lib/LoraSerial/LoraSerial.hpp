@@ -10,6 +10,7 @@ public:
 
     // transmitts input string via lora
     void sendData(String msg);
+    // void sendData(String msgs[]);
 
     // reads received data and strips unwanted formatting
     String parseData();

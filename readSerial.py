@@ -6,43 +6,54 @@
 import serial
 import serial.tools.list_ports
 import sqlite3
-from datetime import datetime
 
 # establish serial connection
 print("=== PORTS: ===")
-for i in serial.tools.list_ports.comports():
-    print(i)
+ports = []
+for n, i in enumerate(serial.tools.list_ports.comports()):
+    print(f'{n} - {i}')
+    ports.append(i.device)
 print()
-ser = serial.Serial(input("Please print Arduino COM / port to listen: "))
+sel = int(input("Please select Arduino COM / port to listen (enter #): "))
+ser = serial.Serial(ports[sel])
 
 # setup connection w sqlite database
-con = sqlite3.connect("carData.db")
+con = sqlite3.connect("testData.db")
 db = con.cursor()
-db.execute('''
-CREATE TABLE IF NOT EXISTS carData (
+db.execute('''CREATE TABLE IF NOT EXISTS testData (
     timestamp INTEGER PRIMARY KEY,
-    speed REAL,
-    battery_voltage REAL,
-    aux_voltage REAL,
-    motor_current REAL,
-    array_current REAL)''')
+    speed REAL)''')
+# con = sqlite3.connect("carData.db")
+# db = con.cursor()
+# db.execute('''
+# CREATE TABLE IF NOT EXISTS carData (
+#     timestamp INTEGER PRIMARY KEY,
+#     speed INTEGER,
+#     battery_voltage REAL,
+#     aux_voltage REAL,
+#     motor_current REAL,
+#     array_current REAL)''')
 
 try:
     while True:
-        # read lora data from arduino and get only the data via str split
-        dataRaw = ser.readline()
-        data = dataRaw.split(',')[2]
+        # read lora data from arduino
+        dataBatch = ser.readline().decode('utf-8')
+        # split each snapshot in n-second long batch
+        dataRaw = dataBatch.strip()[:-1].split(':')
 
-        # timestamp, speed, battery (V), aux (V), motor (I), array(I)
-        dataSp = list(map(int, data.split(';')))
-        ts = dataSp[0]
-        # convert into unix timestamp (POSIX)
-        dataSp[0] = datetime(2000 + ts[4:6], ts[2:4],
-                            ts[0:2], ts[6:8], ts[8:10], ts[10:12]).timestamp()
+        # for all snapshots in batch
+        for data in dataRaw:
+            dataSp = data.split(';')
+            print(dataSp)
 
-        # insert into database after getting values
-        db.execute('INSERT INTO carData VALUES (?, ?, ?, ?, ?, ?)',
-                    dataSp)
+            if len(dataSp) != 2:
+                continue
+            # insert into database
+            db.execute('INSERT INTO testData(timestamp, speed) VALUES (?, ?)',
+                       dataSp)
+            # db.execute('INSERT INTO carData VALUES (?, ?, ?, ?, ?, ?)',
+            #             dataSp)
+            con.commit()
 
 
 except KeyboardInterrupt:  # excute before termination via Ctrl-C

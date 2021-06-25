@@ -1,11 +1,25 @@
 #include "LoraSerial.hpp"
 
-void LoraSerial::sendData(String message)
+void LoraSerial::sendData(String msg)
 {
-    int size = message.length();
-    String res = "AT+SEND=0," + String(size) + "," + message + "\r\n";
+    int size = msg.length();
+    String res = "AT+SEND=0," + String(size) + "," + msg + "\r\n";
     LoraSerial::print(res);
 }
+
+// void LoraSerial::sendData(String msgs[])
+// {
+//     String res = "";
+//     int arrLength = sizeof(msgs) / sizeof(msgs[0]);
+//     for (int i = 0; i < arrLength; i++)
+//     {
+//         res += msgs[i];
+//         if (i != (arrLength - 1))
+//             res += ":";
+//     }
+
+//     LoraSerial::sendData(res);
+// }
 
 String LoraSerial::parseData()
 {

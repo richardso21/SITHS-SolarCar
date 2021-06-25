@@ -1,4 +1,7 @@
 #include "main.hpp"
+
+#define BATCH_SIZE 4
+
 GPSSerial gps;
 LoraSerial lora(2, 3);
 
@@ -10,7 +13,7 @@ void setup()
   gps.begin(9600);
 }
 
-String msgBatch;
+String msgBatch = "";
 int n = 0;
 time_t lastUpdate = -1;
 
@@ -25,18 +28,20 @@ void loop()
       // get data from GPS
       time_t currentTime = gps.getUnixTime();
       double speed = gps.getSpeed();
+
       // ignore data if on same second
       if (currentTime == lastUpdate)
         continue;
       lastUpdate = currentTime;
-      // print data to lora radio
-      String msg = String(speed) + ";" + String(currentTime);
+
+      // store snapshot to msgBatch
+      String msg = String(currentTime) + ";" + String(speed);
       Serial.println(msg);
       msgBatch += msg + ":";
       n++;
     }
     // send 4-second batch of data
-    if (n >= 4)
+    if (n >= BATCH_SIZE)
     {
       lora.sendData(msgBatch);
       msgBatch = "";
