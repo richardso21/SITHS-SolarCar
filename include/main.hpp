@@ -2,9 +2,7 @@
 
 // imports
 #include <Arduino.h>
-#include <AltSoftSerial.h>
+#include <LoraSerial.hpp>
+#include <GPSSerial.hpp>
 #include <LiquidCrystal_I2C.h>
-#include <TinyGPS++.h>
-#include <NeoSWSerial.h>
-#include <TimeLib.h>
 

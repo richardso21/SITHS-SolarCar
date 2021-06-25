@@ -1,40 +1,36 @@
 #include "main.hpp"
-TinyGPSPlus gps;
-AltSoftSerial gpsSerial; //pins 8, 9, unusable 10
-NeoSWSerial loraSerial(2, 3);
-
-String getDataFromGPS();
-void sendData(String data);
+GPSSerial gps;
+LoraSerial lora(2, 3);
 
 void setup()
 {
   Serial.begin(9600);
   // initiate lora and GPS serial coms
-  loraSerial.begin(9600);
-  gpsSerial.begin(9600);
+  lora.begin(9600);
+  gps.begin(9600);
 }
 
 String msgBatch;
 int n = 0;
-String DT;
-double speed;
-int prevSec = -1;
+time_t lastUpdate = -1;
 
 void loop()
 {
   // read and send data once gps is available
-  while (gpsSerial.available())
+  while (gps.available())
   {
-    // encode gps serial data
-    if (gps.encode(gpsSerial.read()))
+    // encode gps data from serial
+    if (gps.GPSencode())
     {
-      // ignore data if on same second
-      if (gps.time.isValid() && gps.time.second() == prevSec)
-        continue;
-      prevSec = gps.time.second();
-
       // get data from GPS
-      String msg = getDataFromGPS();
+      time_t currentTime = gps.getUnixTime();
+      double speed = gps.getSpeed();
+      // ignore data if on same second
+      if (currentTime == lastUpdate)
+        continue;
+      lastUpdate = currentTime;
+      // print data to lora radio
+      String msg = String(speed) + ";" + String(currentTime);
       Serial.println(msg);
       msgBatch += msg + ":";
       n++;
@@ -42,35 +38,9 @@ void loop()
     // send 4-second batch of data
     if (n >= 4)
     {
-      sendData(msgBatch);
+      lora.sendData(msgBatch);
       msgBatch = "";
       n = 0;
     }
   }
-}
-
-// get speed and datetime from gps
-String getDataFromGPS()
-{
-  if (!(gps.speed.isValid() && gps.date.isValid()))
-    return "ERR!";
-
-  double speed = gps.speed.mph();
-  setTime(gps.time.hour(),
-          gps.time.minute(),
-          gps.time.second(),
-          gps.date.day(),
-          gps.date.month(),
-          gps.date.year());
-  time_t timedelta = now();
-  return String(speed) + ";" + String(timedelta);
-}
-
-// sends string data to lora radio
-void sendData(String data)
-{
-  digitalWrite(13, HIGH);
-  int dataSize = data.length();
-  loraSerial.print("AT+SEND=0," + String(dataSize) + "," + data + "\r\n");
-  digitalWrite(13, LOW);
 }
