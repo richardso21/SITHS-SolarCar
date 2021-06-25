@@ -1,17 +1,16 @@
 #include "main.hpp"
 TinyGPSPlus gps;
-AltSoftSerial loraSerial; //pins 8, 9, unusable 10
-NeoSWSerial gpsSerial(2, 3);
+AltSoftSerial gpsSerial; //pins 8, 9, unusable 10
+NeoSWSerial loraSerial(2, 3);
 
 void sendData(String data);
 
 void setup()
 {
   // TODO: lora on AltSS, gps on SS
-
+  Serial.begin(9600);
   // lora on hardware serial
-  loraSerial.begin(115200);
-  loraSerial.print("AT+PARAMETER=12,4,1,7\r\n");
+  loraSerial.begin(9600);
   // gps on alt SS
   gpsSerial.begin(9600);
 }
@@ -19,27 +18,32 @@ void setup()
 String msgTX;
 String datetime;
 double speed;
+int lastSec = -1;
 
 void loop()
 {
   // read and send data once gps is available
-  while (gpsSerial.available())
+  while (gpsSerial.available() > 0)
   {
     // encode gps serial data
-    gps.encode(gpsSerial.read());
-
-    // get speed and datetime from gps
-    if (gps.speed.isValid())
-      speed = gps.speed.mph();
-    if (gps.time.isValid() && gps.date.isValid())
-      datetime = String(gps.date.value()) + String(gps.time.value());
+    if (gps.encode(gpsSerial.read()))
+    {
+      if (gps.time.isValid() && gps.time.second() == lastSec)
+        continue;
+      lastSec = gps.time.second();
+      // get speed and datetime from gps
+      if (gps.speed.isValid())
+        speed = gps.speed.mph();
+      if (gps.date.isValid())
+        datetime = String(gps.date.value()) + String(gps.time.value());
       // DDMMYYHHmmSSCC
 
-    msgTX = String(speed) + ";" + datetime;
-    // 2 (speed) + 14 (datetime) + 1 (;) = 27 bytes
+      msgTX = String(speed) + ";" + datetime;
 
-    sendData(msgTX);
-    delay(1000);
+      Serial.println(msgTX);
+      sendData(msgTX);
+      // delay(2000);
+    }
   }
 }
 

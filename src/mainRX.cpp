@@ -5,8 +5,7 @@ AltSoftSerial loraSerial;
 void setup()
 {
   Serial.begin(9600);
-  loraSerial.begin(115200);
-  loraSerial.print("AT+PARAMETER=12,4,1,7\r\n");
+  loraSerial.begin(9600);
   lcd.init();
   lcd.backlight();
 }
