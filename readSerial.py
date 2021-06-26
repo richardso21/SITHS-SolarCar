@@ -39,7 +39,7 @@ try:
         # read lora data from arduino
         dataBatch = ser.readline().decode('utf-8')
         # split each snapshot in n-second long batch
-        dataRaw = dataBatch.strip()[:-1].split(':')
+        dataRaw = dataBatch.strip()[:-1].split('|')
 
         # for all snapshots in batch
         for data in dataRaw:

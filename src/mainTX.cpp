@@ -1,19 +1,21 @@
 #include "main.hpp"
 
-#define BATCH_SIZE 4
-
 GPSSerial gps;
 LoraSerial lora(2, 3);
+LiquidCrystal_I2C lcd(0x27, 20, 4);
 
 void setup()
 {
+  // initiate serial coms
   Serial.begin(9600);
-  // initiate lora and GPS serial coms
   lora.begin(9600);
   gps.begin(9600);
+  // initialize lcd
+  lcd.init();
+  lcd.backlight();
 }
 
-String msgBatch = "";
+String msgBatch[BATCH_SIZE];
 int n = 0;
 time_t lastUpdate = -1;
 
@@ -25,6 +27,10 @@ void loop()
     // encode gps data from serial
     if (gps.GPSencode())
     {
+      // if gps is still locking position, pass
+      if (!gps.gpsLocked())
+        continue;
+
       // get data from GPS
       time_t currentTime = gps.getUnixTime();
       double speed = gps.getSpeed();
@@ -34,17 +40,24 @@ void loop()
         continue;
       lastUpdate = currentTime;
 
+      // print to lcd
+      lcd.clear();
+      lcd.print("SP: " + String(speed));
+      lcd.setCursor(0, 2);
+      lcd.print("DT: " + String(currentTime));
+
       // store snapshot to msgBatch
       String msg = String(currentTime) + ";" + String(speed);
       Serial.println(msg);
-      msgBatch += msg + ":";
+      msgBatch[n] = msg;
       n++;
     }
-    // send 4-second batch of data
+    // send data after reaching batch size
     if (n >= BATCH_SIZE)
     {
+      lcd.setCursor(19, 3);
+      lcd.print("^");
       lora.sendData(msgBatch);
-      msgBatch = "";
       n = 0;
     }
   }

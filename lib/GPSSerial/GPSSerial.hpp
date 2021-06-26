@@ -21,7 +21,7 @@ public:
     // get tracked speed in MPH
     double getSpeed();
 
-    // check if time has been updated
-    bool timeUpdated();
+    // check if gps has lock
+    bool gpsLocked();
 
 };

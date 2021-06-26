@@ -29,7 +29,7 @@ double GPSSerial::getSpeed()
         return 0;
 }
 
-bool GPSSerial::timeUpdated()
+bool GPSSerial::gpsLocked()
 {
-    return gps.time.isUpdated();
+    return (gps.satellites.isValid() && gps.satellites.value() > 0);
 }

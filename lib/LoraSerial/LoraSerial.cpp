@@ -7,19 +7,18 @@ void LoraSerial::sendData(String msg)
     LoraSerial::print(res);
 }
 
-// void LoraSerial::sendData(String msgs[])
-// {
-//     String res = "";
-//     int arrLength = sizeof(msgs) / sizeof(msgs[0]);
-//     for (int i = 0; i < arrLength; i++)
-//     {
-//         res += msgs[i];
-//         if (i != (arrLength - 1))
-//             res += ":";
-//     }
+void LoraSerial::sendData(String msgs[])
+{
+    String res = "";
+    for (int i = 0; i < BATCH_SIZE; i++)
+    {
+        res += msgs[i];
+        if (i != (BATCH_SIZE - 1))
+            res += "|";
+    }
 
-//     LoraSerial::sendData(res);
-// }
+    LoraSerial::sendData(res);
+}
 
 String LoraSerial::parseData()
 {
