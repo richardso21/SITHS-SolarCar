@@ -24,10 +24,10 @@ public:
     void indCondPrint(String msg, int col, bool condition);
 
     // clear whole indicator row
-    void incClear();
+    void indClear();
 
     // clear denoted portion of indicator row
-    void incClear(int col, int length);
+    void indClear(int col, int length);
 
     // display variable data onto display
     void displayData(

@@ -10,7 +10,7 @@ void setup()
 {
   // initiate serial coms
   Serial.begin(9600);
-  lora.begin(38400);
+  lora.begin(9600);
   gpsSerial.begin(9600);
   // initialize lcd
   lcd.start(true);
@@ -22,7 +22,7 @@ void loop()
     if (gpsSerial.GPSencode())
       mainFunc(true);
   if (millis() > 5000 && gpsSerial.gps.charsProcessed() < 10)
-    while(true)
+    while (true)
       mainFunc(false);
 }
 
@@ -49,6 +49,7 @@ int mainFunc(bool gpsEnabled)
   }
   else
   {
+    lcd.indClear();
     lcd.indCondPrint("NO GPS", 0, true);
     currentTime = 0;
     speed = 0;
@@ -62,7 +63,7 @@ int mainFunc(bool gpsEnabled)
     lora.queueData(currentTime, speed, 0, 0, 0, 0, 0);
 
   // indicate if data batch is sent
-  lcd.indCondPrint("S", 18, lora.hasSent());
+  lcd.indCondPrint("S", 19, lora.hasSent());
 
   return 0;
 }

@@ -5,7 +5,7 @@ int pin = 13;
 void setup()
 {
   Serial.begin(9600);
-  lora.begin(38400);
+  lora.begin(9600);
   pinMode(pin, OUTPUT);
 }
 
@@ -15,7 +15,6 @@ void loop()
   {
     digitalWrite(pin, HIGH);
     Serial.println(lora.parseData());
-    // lora.sendData("RCVD");
     digitalWrite(pin, LOW);
   }
 }

@@ -42,16 +42,16 @@ void LCD::indCondPrint(String msg, int col, bool condition)
         LCD::indPrint(msg, col);
     }
     else if (rn >= (_prevIndPrint + 500))
-        LCD::incClear(col, msg.length());
+        LCD::indClear(col, msg.length());
 }
 
-void LCD::incClear()
+void LCD::indClear()
 {
     LCD::setCursor(0, 1);
     LCD::print("                    ");
 }
 
-void LCD::incClear(int col, int length)
+void LCD::indClear(int col, int length)
 {
     LCD::setCursor(col, 1);
     for (int i = 0; i < length; i++)
