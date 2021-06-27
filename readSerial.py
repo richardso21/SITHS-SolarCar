@@ -57,5 +57,6 @@ try:
 
 
 except KeyboardInterrupt:  # excute before termination via Ctrl-C
+    print("Closing connections...")
     ser.close()
     con.close()

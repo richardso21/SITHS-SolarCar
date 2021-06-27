@@ -26,16 +26,36 @@ void LCD::formatSetup()
     LCD::print("ARR:");
 }
 
-void LCD::dprint(String msg)
+void LCD::indPrint(String msg, int col)
 {
-    LCD::setCursor(0, 1);
+    LCD::setCursor(col, 1);
     LCD::print(msg);
 }
 
-void LCD::dclear()
+void LCD::indCondPrint(String msg, int col, bool condition)
+{
+    unsigned long rn = millis();
+    if (condition)
+    {
+        if (rn > _prevIndPrint)
+            _prevIndPrint = rn;
+        LCD::indPrint(msg, col);
+    }
+    else if (rn >= (_prevIndPrint + 500))
+        LCD::incClear(col, msg.length());
+}
+
+void LCD::incClear()
 {
     LCD::setCursor(0, 1);
     LCD::print("                    ");
+}
+
+void LCD::incClear(int col, int length)
+{
+    LCD::setCursor(col, 1);
+    for (int i = 0; i < length; i++)
+        LCD::print(" ");
 }
 
 String formatInt(int i, int padding)
