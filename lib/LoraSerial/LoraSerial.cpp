@@ -7,17 +7,58 @@ void LoraSerial::sendData(String msg)
     LoraSerial::print(res);
 }
 
-void LoraSerial::sendData(String msgs[])
+void LoraSerial::sendData(
+    time_t unixTime,
+    int speed,
+    int vBatt,
+    double vAux,
+    double aMotor,
+    double aShunt,
+    int temp)
 {
-    String res = "";
-    for (int i = 0; i < BATCH_SIZE; i++)
-    {
-        res += msgs[i];
-        if (i != (BATCH_SIZE - 1))
-            res += "|";
-    }
+    String msg =
+        String(unixTime) + ";" +
+        String(speed) + ";" +
+        String(vBatt) + ";" +
+        String(vAux) + ";" +
+        String(aMotor) + ";" +
+        String(aShunt) + ";" +
+        String(temp);
 
-    LoraSerial::sendData(res);
+    LoraSerial::sendData(msg);
+}
+
+void LoraSerial::queueData(String msg)
+{
+    dataBuffer += (msg + "|");
+    _c++;
+    if (_c == BATCH_SIZE)
+    {
+        LoraSerial::sendData(dataBuffer);
+        _c = 0;
+        dataBuffer = "";
+    }
+}
+
+void LoraSerial::queueData(
+    time_t unixTime,
+    int speed,
+    int vBatt,
+    double vAux,
+    double aMotor,
+    double aShunt,
+    int temp)
+{
+    String msg =
+        String(unixTime) + ";" +
+        String(speed) + ";" +
+        String(vBatt) + ";" +
+        String(vAux) + ";" +
+        String(aMotor) + ";" +
+        String(aShunt) + ";" +
+        String(temp);
+
+    LoraSerial::queueData(msg);
 }
 
 String LoraSerial::parseData()

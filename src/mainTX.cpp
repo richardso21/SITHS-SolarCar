@@ -1,64 +1,45 @@
 #include "main.hpp"
 
-GPSSerial gps;
+GPSSerial gpsSerial;
 LoraSerial lora(2, 3);
-LiquidCrystal_I2C lcd(0x27, 20, 4);
+LCD lcd(0x27, 20, 4);
 
 void setup()
 {
   // initiate serial coms
   Serial.begin(9600);
-  lora.begin(9600);
-  gps.begin(9600);
+  lora.begin(38400);
+  gpsSerial.begin(9600);
   // initialize lcd
-  lcd.init();
-  lcd.backlight();
+  lcd.start(true);
+  lcd.dprint("Locking Position...");
 }
-
-String msgBatch[BATCH_SIZE];
-int n = 0;
-time_t lastUpdate = -1;
 
 void loop()
 {
   // read and send data once gps is available
-  while (gps.available())
+  while (gpsSerial.available())
   {
     // encode gps data from serial
-    if (gps.GPSencode())
+    if (gpsSerial.GPSencode())
     {
-      // if gps is still locking position, pass
-      if (!gps.gpsLocked())
+      lcd.dclear();
+      // if gps is locking position or collecting on same second, pass
+      if (!gpsSerial.gpsLocked() || !gpsSerial.secondUpdated())
         continue;
 
       // get data from GPS
-      time_t currentTime = gps.getUnixTime();
-      double speed = gps.getSpeed();
-
-      // ignore data if on same second
-      if (currentTime == lastUpdate)
-        continue;
-      lastUpdate = currentTime;
+      time_t currentTime = gpsSerial.getUnixTime();
+      int speed = gpsSerial.getSpeed();
 
       // print to lcd
-      lcd.clear();
-      lcd.print("SP: " + String(speed));
-      lcd.setCursor(0, 2);
-      lcd.print("DT: " + String(currentTime));
+      lcd.displayData(currentTime, speed, 0, 0, 0, 0);
+      // lcd.displayData(currentTime, 30, 100, 12.5, 12.5, 13.5);
 
-      // store snapshot to msgBatch
-      String msg = String(currentTime) + ";" + String(speed);
-      Serial.println(msg);
-      msgBatch[n] = msg;
-      n++;
-    }
-    // send data after reaching batch size
-    if (n >= BATCH_SIZE)
-    {
-      lcd.setCursor(19, 3);
-      lcd.print("^");
-      lora.sendData(msgBatch);
-      n = 0;
+      // transmit data over 2-second intervals
+      if (gpsSerial.intervalUpdated(2))
+        lora.queueData(currentTime, speed, 0, 0, 0, 0, 0);
+      // lora.queueData(currentTime, 30, 100, 12.5, 12.5, 13.5, 105);
     }
   }
 }

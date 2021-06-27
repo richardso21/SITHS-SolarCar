@@ -21,15 +21,37 @@ time_t GPSSerial::getUnixTime()
         return 0;
 }
 
-double GPSSerial::getSpeed()
+bool GPSSerial::secondUpdated()
+{
+    time_t rn = gps.time.value();
+    if (rn > _secondUpdate)
+    {
+        _secondUpdate = rn;
+        return true;
+    }
+    return false;
+}
+
+bool GPSSerial::intervalUpdated(int interval)
+{
+    time_t rn = gps.time.value();
+    if (rn > (_intervalUpdate + ((interval - 1) * 100)))
+    {
+        _intervalUpdate = rn;
+        return true;
+    }
+    return false;
+}
+
+int GPSSerial::getSpeed()
 {
     if (gps.speed.isValid())
-        return gps.speed.mph();
+        return (int)round(gps.speed.mph());
     else
         return 0;
 }
 
 bool GPSSerial::gpsLocked()
 {
-    return (gps.satellites.isValid() && gps.satellites.value() > 0);
+    return (gps.satellites.isValid() && (gps.satellites.value() > 0));
 }
