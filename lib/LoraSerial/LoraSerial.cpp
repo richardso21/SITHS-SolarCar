@@ -5,19 +5,6 @@ void LoraSerial::sendData(String msg)
     int size = msg.length();
     String res = "AT+SEND=0," + String(size) + "," + msg + "\r\n";
     LoraSerial::print(res);
-    _timeSent = millis();
-}
-
-void LoraSerial::queueData(String msg)
-{
-    dataBuffer += (msg + "|");
-    _c++;
-    if (_c == BATCH_SIZE)
-    {
-        LoraSerial::sendData(dataBuffer);
-        _c = 0;
-        dataBuffer = "";
-    }
 }
 
 void LoraSerial::sendData(
@@ -41,30 +28,14 @@ void LoraSerial::sendData(
     LoraSerial::sendData(msg);
 }
 
-void LoraSerial::queueData(
-    time_t unixTime,
-    int speed,
-    int vBatt,
-    double vAux,
-    double aMotor,
-    double aShunt,
-    int temp)
+void LoraSerial::sendConfirm()
 {
-    String msg =
-        String(unixTime) + ";" +
-        String(speed) + ";" +
-        String(vBatt) + ";" +
-        String(vAux) + ";" +
-        String(aMotor) + ";" +
-        String(aShunt) + ";" +
-        String(temp);
-
-    LoraSerial::queueData(msg);
+    LoraSerial::sendData("R");
 }
 
-bool LoraSerial::hasSent()
+bool LoraSerial::receivedConfirm()
 {
-    return millis() < (_timeSent + 500);
+    return LoraSerial::available() && LoraSerial::parseData().equals("R");
 }
 
 String LoraSerial::parseData()

@@ -32,17 +32,6 @@ bool GPSSerial::secondUpdated()
     return false;
 }
 
-bool GPSSerial::intervalUpdated(int interval)
-{
-    time_t rn = gps.time.value();
-    if (rn > (_intervalUpdate + ((interval - 1) * 100)))
-    {
-        _intervalUpdate = rn;
-        return true;
-    }
-    return false;
-}
-
 int GPSSerial::getSpeed()
 {
     if (gps.speed.isValid())

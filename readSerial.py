@@ -18,21 +18,22 @@ sel = int(input("Please select Arduino COM / port to listen (enter #): "))
 ser = serial.Serial(ports[sel])
 
 # setup connection w sqlite database
+# con = sqlite3.connect("testData.db")
+# db = con.cursor()
+# db.execute('''CREATE TABLE IF NOT EXISTS testData (
+#     timestamp INTEGER PRIMARY KEY,
+#     speed REAL)''')
 con = sqlite3.connect("testData.db")
 db = con.cursor()
-db.execute('''CREATE TABLE IF NOT EXISTS testData (
+db.execute('''
+CREATE TABLE IF NOT EXISTS carData (
     timestamp INTEGER PRIMARY KEY,
-    speed REAL)''')
-# con = sqlite3.connect("carData.db")
-# db = con.cursor()
-# db.execute('''
-# CREATE TABLE IF NOT EXISTS carData (
-#     timestamp INTEGER PRIMARY KEY,
-#     speed INTEGER,
-#     battery_voltage REAL,
-#     aux_voltage REAL,
-#     motor_current REAL,
-#     array_current REAL)''')
+    speed INTEGER,
+    battery_voltage REAL,
+    aux_voltage REAL,
+    motor_current REAL,
+    array_current REAL,
+    temp INTEGER)''')
 
 try:
     while True:
@@ -46,13 +47,13 @@ try:
             dataSp = data.split(';')
             print(dataSp)
 
-            if len(dataSp) != 2:
+            if len(dataSp) < 2:
                 continue
             # insert into database
-            db.execute('INSERT INTO testData(timestamp, speed) VALUES (?, ?)',
-                       dataSp)
-            # db.execute('INSERT INTO carData VALUES (?, ?, ?, ?, ?, ?)',
-            #             dataSp)
+            # db.execute('INSERT INTO testData(timestamp, speed) VALUES (?, ?)',
+            #            dataSp)
+            db.execute('INSERT INTO carData VALUES (?, ?, ?, ?, ?, ?, ?)',
+                        dataSp)
             con.commit()
 
 

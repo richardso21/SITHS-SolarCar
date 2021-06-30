@@ -4,6 +4,8 @@ GPSSerial gpsSerial;
 LoraSerial lora(2, 3);
 LCD lcd(0x27, 20, 4);
 
+bool firstSend = true;
+
 int mainFunc(bool gpsEnabled);
 
 void setup()
@@ -14,6 +16,7 @@ void setup()
   gpsSerial.begin(9600);
   // initialize lcd
   lcd.start(true);
+  lcd.indPrint("/", 18);
 }
 
 void loop()
@@ -21,6 +24,7 @@ void loop()
   while (gpsSerial.available())
     if (gpsSerial.GPSencode())
       mainFunc(true);
+  // if gps is missing / not encoding stuff
   if (millis() > 5000 && gpsSerial.gps.charsProcessed() < 10)
     while (true)
       mainFunc(false);
@@ -28,6 +32,9 @@ void loop()
 
 int mainFunc(bool gpsEnabled)
 {
+  bool received = lora.receivedConfirm();
+  // indicate if received
+  lcd.indCondPrint("R", 17, received);
   time_t currentTime;
   int speed;
 
@@ -49,8 +56,8 @@ int mainFunc(bool gpsEnabled)
   }
   else
   {
-    lcd.indClear();
-    lcd.indCondPrint("NO GPS", 0, true);
+    // indicate no GPS, nullify time and speed
+    lcd.indCondPrint("NO GPS!", 0, true);
     currentTime = 0;
     speed = 0;
   }
@@ -58,12 +65,15 @@ int mainFunc(bool gpsEnabled)
   // print to lcd
   lcd.displayData(currentTime, speed, 0, 0, 0, 0);
 
-  // transmit data over 2-second intervals
-  if (gpsSerial.intervalUpdated(2))
-    lora.queueData(currentTime, speed, 0, 0, 0, 0, 0);
+  // send to RX during first send or after received confirmation
+  if (received || firstSend)
+  {
+    lora.sendData(currentTime, speed, 0, 0, 0, 0, 0);
+    // 1010101010;00;000;00.0;00.0;00.0;00 (36 characters)
+    firstSend = false;
+  }
 
-  // indicate if data batch is sent
-  lcd.indCondPrint("S", 19, lora.hasSent());
+  lcd.indCondPrint("S", 19, received || firstSend);
 
   return 0;
 }

@@ -13,8 +13,12 @@ void loop()
 {
   if (lora.available())
   {
+    String msg = lora.readString();
+    if (msg.equals("+OK") || msg.equals("\r\n"))
+      return;
     digitalWrite(pin, HIGH);
-    Serial.println(lora.parseData());
+    Serial.println(lora.readString());
+    lora.sendConfirm();
     digitalWrite(pin, LOW);
   }
 }
