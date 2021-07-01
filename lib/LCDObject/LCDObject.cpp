@@ -99,7 +99,7 @@ void LCD::displayData(
     LCD::print(formatInt(vBatt, 3));
     LCD::print("V");
     LCD::setCursor(14, 2);
-    LCD::print(vAux, 1);
+    LCD::print(vAux, 2);
     LCD::print("V");
     // Line 3
     LCD::setCursor(4, 3);

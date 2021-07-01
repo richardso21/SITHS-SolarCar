@@ -28,16 +28,6 @@ void LoraSerial::sendData(
     LoraSerial::sendData(msg);
 }
 
-void LoraSerial::sendConfirm()
-{
-    LoraSerial::sendData("R");
-}
-
-bool LoraSerial::receivedConfirm()
-{
-    return LoraSerial::available() && LoraSerial::parseData().equals("R");
-}
-
 String LoraSerial::parseData()
 {
     String msg = LoraSerial::readString();

@@ -24,12 +24,6 @@ public:
         double aShunt,
         int temp);
 
-    // send confirm message (from RX to TX)
-    void sendConfirm();
-
-    // returns if TX has received confirmation from RX
-    bool receivedConfirm();
-
     // reads received data and strips unwanted formatting
     String parseData();
 };
