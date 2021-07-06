@@ -1,61 +1,61 @@
 #include "LCDObject.hpp"
 
-void LCD::start(bool bl)
+void LCDObject::start(bool bl)
 {
-    LCD::init();
+    LCDObject::init();
     if (bl)
-        LCD::backlight();
-    LCD::formatSetup();
+        LCDObject::backlight();
+    LCDObject::formatSetup();
 }
 
-void LCD::formatSetup()
+void LCDObject::formatSetup()
 {
-    LCD::clear();
+    LCDObject::clear();
     // Line 1
-    LCD::setCursor(15, 0);
-    LCD::print("MPH");
+    LCDObject::setCursor(15, 0);
+    LCDObject::print("MPH");
     // Line 2
-    LCD::setCursor(0, 2);
-    LCD::print("BAT:");
-    LCD::setCursor(10, 2);
-    LCD::print("AUX:");
+    LCDObject::setCursor(0, 2);
+    LCDObject::print("BAT:");
+    LCDObject::setCursor(10, 2);
+    LCDObject::print("AUX:");
     // Line 3
-    LCD::setCursor(0, 3);
-    LCD::print("MOT:");
-    LCD::setCursor(10, 3);
-    LCD::print("ARR:");
+    LCDObject::setCursor(0, 3);
+    LCDObject::print("MOT:");
+    LCDObject::setCursor(10, 3);
+    LCDObject::print("ARR:");
 }
 
-void LCD::indPrint(String msg, int col)
+void LCDObject::indPrint(String msg, int col)
 {
-    LCD::setCursor(col, 1);
-    LCD::print(msg);
+    LCDObject::setCursor(col, 1);
+    LCDObject::print(msg);
 }
 
-void LCD::indCondPrint(String msg, int col, bool condition)
+void LCDObject::indCondPrint(String msg, int col, bool condition)
 {
     unsigned long rn = millis();
     if (condition)
     {
         if (rn > _prevIndPrint)
             _prevIndPrint = rn;
-        LCD::indPrint(msg, col);
+        LCDObject::indPrint(msg, col);
     }
     else if (rn >= (_prevIndPrint + 500))
-        LCD::indClear(col, msg.length());
+        LCDObject::indClear(col, msg.length());
 }
 
-void LCD::indClear()
+void LCDObject::indClear()
 {
-    LCD::setCursor(0, 1);
-    LCD::print("                    ");
+    LCDObject::setCursor(0, 1);
+    LCDObject::print("                    ");
 }
 
-void LCD::indClear(int col, int length)
+void LCDObject::indClear(int col, int length)
 {
-    LCD::setCursor(col, 1);
+    LCDObject::setCursor(col, 1);
     for (int i = 0; i < length; i++)
-        LCD::print(" ");
+        LCDObject::print(" ");
 }
 
 String formatInt(int i, int padding)
@@ -75,7 +75,7 @@ String formatInt(int i, int padding)
     return res;
 }
 
-void LCD::displayData(
+void LCDObject::displayData(
     time_t unixTime,
     int speed,
     int vBatt,
@@ -90,22 +90,22 @@ void LCD::displayData(
         formatInt(second(unixTime), 2)};
 
     // Line 1
-    LCD::setCursor(0, 0);
-    LCD::print(TF[0] + ":" + TF[1] + ":" + TF[2]);
-    LCD::setCursor(12, 0);
-    LCD::print(formatInt(speed, 2));
+    LCDObject::setCursor(0, 0);
+    LCDObject::print(TF[0] + ":" + TF[1] + ":" + TF[2]);
+    LCDObject::setCursor(12, 0);
+    LCDObject::print(formatInt(speed, 2));
     // Line 2
-    LCD::setCursor(4, 2);
-    LCD::print(formatInt(vBatt, 3));
-    LCD::print("V");
-    LCD::setCursor(14, 2);
-    LCD::print(vAux, 2);
-    LCD::print("V");
+    LCDObject::setCursor(4, 2);
+    LCDObject::print(formatInt(vBatt, 3));
+    LCDObject::print("V");
+    LCDObject::setCursor(14, 2);
+    LCDObject::print(vAux, 2);
+    LCDObject::print("V");
     // Line 3
-    LCD::setCursor(4, 3);
-    LCD::print(aMot, 1);
-    LCD::print("A");
-    LCD::setCursor(14, 3);
-    LCD::print(aShunt, 1);
-    LCD::print("A");
+    LCDObject::setCursor(4, 3);
+    LCDObject::print(aMot, 1);
+    LCDObject::print("A");
+    LCDObject::setCursor(14, 3);
+    LCDObject::print(aShunt, 1);
+    LCDObject::print("A");
 }

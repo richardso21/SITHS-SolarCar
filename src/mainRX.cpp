@@ -4,17 +4,17 @@ int pin = 13;
 
 void setup()
 {
-  Serial.begin(9600);
-  lora.begin(9600);
-  pinMode(pin, OUTPUT);
+    Serial.begin(9600);
+    lora.begin(9600);
+    pinMode(pin, OUTPUT);
 }
 
 void loop()
 {
-  if (lora.available())
-  {
-    digitalWrite(pin, HIGH);
-    Serial.println(lora.parseData());
-    digitalWrite(pin, LOW);
-  }
+    if (lora.available())
+    {
+        digitalWrite(pin, HIGH);
+        Serial.println(lora.parseData());
+        digitalWrite(pin, LOW);
+    }
 }

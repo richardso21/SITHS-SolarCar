@@ -4,7 +4,7 @@
 #include <LiquidCrystal_I2C.h>
 #include <TimeLib.h>
 
-class LCD : public LiquidCrystal_I2C
+class LCDObject : public LiquidCrystal_I2C
 {
 private:
     unsigned long _prevIndPrint = 0;
