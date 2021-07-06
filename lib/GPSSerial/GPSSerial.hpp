@@ -9,7 +9,6 @@ class GPSSerial : public AltSoftSerial
 {
 private:
     time_t _secondUpdate = 0;
-    time_t _intervalUpdate = 0;
 public:
     using AltSoftSerial::AltSoftSerial;
 
@@ -24,9 +23,6 @@ public:
 
     // return if the gps is encoding new second
     bool secondUpdated();
-
-    // return if the time has reached at given interval
-    bool intervalUpdated(int interval);
 
     // get rounded speed in integer MPH
     int getSpeed();

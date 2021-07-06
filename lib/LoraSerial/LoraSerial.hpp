@@ -9,38 +9,26 @@
 class LoraSerial : public NeoSWSerial
 {
 private:
-    String dataBuffer = "";
-    int _c = 0;
-    unsigned long _timeSent = 0;
 public:
     using NeoSWSerial::NeoSWSerial;
 
     // transmitts input string via lora
-    void sendData(String msg);
-
-    // queue's data into buffer
-    void queueData(String msg);
-
     void sendData(
-        time_t unixTime,
         int speed,
         int vBatt,
         double vAux,
-        double aMot,
-        double aShunt,
-        int temp);
+        double aMotor,
+        double aShunt);
+    // void sendData(String msg);
 
-    void queueData(
-        time_t unixTime,
-        int speed,
-        int vBatt,
-        double vAux,
-        double aMot,
-        double aShunt,
-        int temp);
-
-    // returns if lora has sent data recently (past second)
-    bool hasSent();
+    // void sendData(
+    //     time_t unixTime,
+    //     int speed,
+    //     int vBatt,
+    //     double vAux,
+    //     double aMot,
+    //     double aShunt,
+    //     int temp);
 
     // reads received data and strips unwanted formatting
     String parseData();

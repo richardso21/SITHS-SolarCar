@@ -4,7 +4,7 @@
 #include <LiquidCrystal_I2C.h>
 #include <TimeLib.h>
 
-class LCD : public LiquidCrystal_I2C
+class LCDObject : public LiquidCrystal_I2C
 {
 private:
     unsigned long _prevIndPrint = 0;
@@ -17,10 +17,10 @@ public:
     // format static characters in display
     void formatSetup();
 
-    // print on reserved indicator row 
+    // print on reserved indicator row until erase
     void indPrint(String msg, int col);
 
-    // print on indicator, given a truthy condition
+    // print or erase on indicator based on condition
     void indCondPrint(String msg, int col, bool condition);
 
     // clear whole indicator row
