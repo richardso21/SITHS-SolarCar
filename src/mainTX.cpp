@@ -1,6 +1,6 @@
 #include "main.hpp"
 
-// #define INTERVAL_SEC 0
+#define INTERVAL_SEC 15
 #define V_REF 1.1
 #define R1 20
 #define R2 1
@@ -9,7 +9,9 @@
 GPSSerial gpsSerial;
 LoraSerial lora(2, 3);
 LCDObject lcd(0x27, 20, 4);
-ADCObject adc;
+// ADCObject adc;
+
+unsigned long _lastSend = 0;
 
 int mainFunc(bool gpsEnabled);
 
@@ -41,8 +43,8 @@ void loop()
 int mainFunc(bool gpsEnabled)
 {
     // measure aux voltage (arduino's own voltage)
-    double vAux = (double)analogRead(A0) * (V_REF / 1023.0) * 21.0;
-    Serial.println(vAux);
+    double vAux = (double)analogRead(A0) * (V_REF / 1023.0) * VDIV_RATIO;
+    // Serial.println(vAux);
 
     time_t currentTime;
     int speed;
@@ -55,9 +57,9 @@ int mainFunc(bool gpsEnabled)
         if (locking)
             return 1;
 
-        // // if gps collecting on same second, pass
-        // if (!gpsSerial.secondUpdated())
-        //     return 1;
+        // if gps collecting on same second, pass
+        if (!gpsSerial.secondUpdated())
+            return 1;
 
         // get data from GPS
         currentTime = gpsSerial.getUnixTime();
@@ -77,7 +79,8 @@ int mainFunc(bool gpsEnabled)
     lcd.displayData(currentTime, speed, 0, vAux, 0, 0);
 
     // send data via lora
-    lora.sendData(currentTime, speed, 0, vAux, 0, 0, 0);
+    if (millis() > (_lastSend + (INTERVAL_SEC * 1000)))
+        lora.sendData(speed, 0, vAux, 0, 0);
 
     return 0;
 }
