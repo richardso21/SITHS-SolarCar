@@ -9,7 +9,7 @@
 GPSSerial gpsSerial;
 LoraSerial lora(2, 3);
 LCDObject lcd(0x27, 20, 4);
-// ADCObject adc;
+// ADE7912 adc;
 
 unsigned long _lastSend = 0;
 

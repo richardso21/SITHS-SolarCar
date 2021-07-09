@@ -1,25 +1,25 @@
 #include "ADCObject.hpp"
 
-byte ADCObject::readByte(int ss, byte readFrom)
+byte ADE7912::readByte(int ss, byte readFrom)
 {
     byte res;
     digitalWrite(ss, LOW);
-    res = transfer(readFrom | READ);
+    transfer(readFrom | READ);
+    res = transfer(DC_BYTE);
     digitalWrite(ss, HIGH);
     return res;
 }
 
-void ADCObject::readBytes(int ss, byte readFrom, int len, byte *data)
+void ADE7912::readBytes(int ss, byte readFrom, int len, byte readTo[])
 {
     digitalWrite(ss, LOW);
     transfer(readFrom | READ);
-    // for (int i = (len - 1); i <= 0; i--)
     for (int i = 0; i < len; i++)
-        data[i] = transfer(DC_BYTE);
+        readTo[i] = transfer(DC_BYTE);
     digitalWrite(ss, HIGH);
 }
 
-void ADCObject::writeByte(int ss, byte writeTo, byte writeMsg)
+void ADE7912::writeByte(int ss, byte writeTo, byte writeMsg)
 {
     digitalWrite(ss, LOW);
     transfer(writeTo);
@@ -27,14 +27,13 @@ void ADCObject::writeByte(int ss, byte writeTo, byte writeMsg)
     digitalWrite(ss, HIGH);
 }
 
-void ADCObject::init(int dReadyPin, int ss1, int ss2)
+void ADE7912::init(uint32_t clock, int dReadyPin, int ss1, int ss2)
 {
-    // set pins to private variables
+    // set pins and settings to private variables
     _dReadyPin = dReadyPin;
     _ss1 = ss1;
     _ss2 = ss2;
-    // _spiSettings = &SPISettings(4096000, MSBFIRST, SPI_MODE3);
-    _spiSettings = &SPISettings(2500000, MSBFIRST, SPI_MODE3);
+    _spiSettings = &SPISettings(clock, MSBFIRST, SPI_MODE3);
 
     // pin modes for ss
     pinMode(_ss1, OUTPUT);
@@ -42,9 +41,12 @@ void ADCObject::init(int dReadyPin, int ss1, int ss2)
     pinMode(_ss2, OUTPUT);
     digitalWrite(_ss2, HIGH);
     begin();
+
+    // begin power up procedure
+    powerUp();
 }
 
-void ADCObject::powerUp()
+void ADE7912::powerUp()
 {
     beginTransaction(*_spiSettings);
 
@@ -81,34 +83,47 @@ void ADCObject::powerUp()
     endTransaction();
 }
 
-void ADCObject::burstReadData(double *ADCData)
+void ADE7912::burstReadData(double ADCData[])
 {
     beginTransaction(*_spiSettings);
     byte dataA[6];
     byte dataB[6];
-    double resA[2];
-    double resB[2];
+    long mBatt, mArr, mMot;
+    double res[3];
 
     // read IWV and V1 from both ADCs
     readBytes(_ss1, IWV, 6, dataA);
     readBytes(_ss2, IWV, 6, dataB);
 
-    translateDataBytes(dataA, resA, 249000, 1);
-    translateDataBytes(dataB, resB, 100, 1);
+    // translate arrays of bytes to 24-bit signed longs
+    long mBatt = translateDataBytes(dataA, 0, 3);
+    long mArr = translateDataBytes(dataA, 3, 6);
+    // long mMisc = translateDataBytes(dataB, 0, 3);
+    long mMot = translateDataBytes(dataB, 3, 6);
+
+    // ADCData[0] = resA;
+    // ADCData[1] = resB;
 
     endTransaction();
 }
 
-void ADCObject::translateDataBytes(byte *data, double *res, uint64_t r1, uint64_t r2)
+long ADE7912::translateDataBytes(byte data[], int begin, int end)
 {
-    int64_t iwv_res = 0;
-    int64_t v1_res = 0;
+    // check if signed byte is a negative
+    bool neg = data[0] & (1 << 7);
 
-    for (int i = 0; i < 3; i++)
-        iwv_res = (iwv_res << 8) | data[i];
-    for (int i = 3; i < 6; i++)
-        v1_res = (v1_res << 8) | data[i];
-    
-    res[0] = iwv_res;
-
+    long val = 0;
+    // long res;
+    for (int i = begin; i < end; i++)
+    {
+        // shift one byte left for next byte
+        val = (val << 8) | data[i];
+    }
+    // use two's complement to convert unsigned to signed
+    if (neg)
+    {
+        val = -(~(val - 1) & 0xFFFFFF);
+        // res = val & 0xFFFFFF;
+    }
+    return val;
 }

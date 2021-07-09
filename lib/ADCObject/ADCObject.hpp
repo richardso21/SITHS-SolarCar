@@ -29,7 +29,7 @@
 // --- IMPORTANT ---
 // This class and all its methods assumes a setup of two
 // ADE7912's clocked with an external 4.096 MHz crystal
-class ADCObject : public SPIClass
+class ADE7912 : public SPIClass
 {
 private:
     int _dReadyPin, _ss1, _ss2;
@@ -39,21 +39,21 @@ private:
     byte readByte(int ss, byte readFrom);
 
     // read bytes from a register to a byte array
-    void readBytes(int ss, byte readFrom, int len, byte *data);
+    void readBytes(int ss, byte readFrom, int len, byte readTo[]);
 
     // write a byte onto a register
     void writeByte(int ss, byte writeTo, byte writeMsg);
 
 public:
-    // start ADC SPI with optimal settings
-    void init(int dReadyPin, int ss1, int ss2);
+    // start SPI bus for ADC with specificed clock frequency
+    void init(uint32_t clock, int dReadyPin, int ss1, int ss2);
 
-    // run power-up procedure and return if complete
+    // run power-up procedure
     void powerUp();
 
     // get values of data
-    void burstReadData(double *ADCData);
+    void burstReadData(double ADCData[]);
 
-    // translate an array of bytes into unsigned long
-    void translateDataBytes(byte *data, double *res, uint64_t r1, uint64_t r2);
+    // translate an array of bytes into long
+    long translateDataBytes(byte data[], int begin, int end);
 };
