@@ -41,7 +41,7 @@ void ADE7912::init(SPISettings spiSettings, int dReadyPin, int ss1, int ss2)
     digitalWrite(_ss1, HIGH);
     pinMode(_ss2, OUTPUT);
     digitalWrite(_ss2, HIGH);
-    begin();
+    // begin();
 
     // begin power up procedure
     powerUp();
@@ -60,8 +60,12 @@ void ADE7912::powerUp()
     // unlock config register
     writeByte(_ss1, LOCK_REG, UNLOCK_BYTE);
 
+    Serial.println(readByte(_ss1, CONFIG));
+
     // set config for ADC A to have CLKOUT functionality
     writeByte(_ss1, CONFIG, 0b00110001);
+
+    Serial.println(readByte(_ss1, CONFIG));
 
     // set EMI_CTRL for ADC A
     writeByte(_ss1, EMI_CTRL, EMI_A);
@@ -81,6 +85,8 @@ void ADE7912::powerUp()
     writeByte(_ss1, LOCK_REG, LOCK_BYTE);
     writeByte(_ss2, LOCK_REG, LOCK_BYTE);
 
+    Serial.println("ADCs Configured!");
+
     endTransaction();
 }
 
@@ -96,6 +102,19 @@ void ADE7912::burstReadData(double ADCData[])
     // read IWV and V1 from both ADCs
     readBytes(_ss1, IWV, 6, dataA);
     readBytes(_ss2, IWV, 6, dataB);
+
+    Serial.print(dataA[0]);
+    Serial.print(" ");
+    Serial.print(dataA[1]);
+    Serial.print(" ");
+    Serial.print(dataA[2]);
+    Serial.print(" ");
+    Serial.print(dataA[3]);
+    Serial.print(" ");
+    Serial.print(dataA[4]);
+    Serial.print(" ");
+    Serial.print(dataA[5]);
+    Serial.print(" ");
 
     endTransaction();
 

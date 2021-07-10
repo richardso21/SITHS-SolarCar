@@ -31,7 +31,7 @@ void setup()
     analogReference(INTERNAL);
     analogRead(A0);
 
-    SPISettings spiSettings(2500000, MSBFIRST, SPI_MODE3);
+    SPISettings spiSettings(250000, MSBFIRST, SPI_MODE3);
 
     adc.init(spiSettings, DREADY, ADCA, ADCB);
 }
@@ -55,6 +55,9 @@ int mainFunc(bool gpsEnabled)
 {
     double ADCData[3];
     adc.burstReadData(ADCData);
+    Serial.println(ADCData[0]);
+    Serial.println(ADCData[1]);
+    Serial.println(ADCData[2]);
     // measure aux voltage (arduino's own voltage)
     double vAux = (double)analogRead(A0) * (V_REF / 1023.0) * VDIV_RATIO;
 
@@ -97,6 +100,6 @@ int mainFunc(bool gpsEnabled)
         lora.sendData(speed, ADCData[0], vAux, ADCData[1], ADCData[2]);
     }
 
-    delay(5000);
+    delay(1000);
     return 0;
 }
