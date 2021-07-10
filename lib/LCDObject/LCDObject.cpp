@@ -78,7 +78,7 @@ String formatInt(int i, int padding)
 void LCDObject::displayData(
     time_t unixTime,
     int speed,
-    int vBatt,
+    double vBatt,
     double vAux,
     double aMot,
     double aShunt)
@@ -96,10 +96,10 @@ void LCDObject::displayData(
     LCDObject::print(formatInt(speed, 2));
     // Line 2
     LCDObject::setCursor(4, 2);
-    LCDObject::print(formatInt(vBatt, 3));
+    LCDObject::print(vBatt, 1);
     LCDObject::print("V");
     LCDObject::setCursor(14, 2);
-    LCDObject::print(vAux, 2);
+    LCDObject::print(vAux, 1);
     LCDObject::print("V");
     // Line 3
     LCDObject::setCursor(4, 3);

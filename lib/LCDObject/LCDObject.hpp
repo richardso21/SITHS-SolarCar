@@ -33,7 +33,7 @@ public:
     void displayData(
         time_t unixTime,
         int speed,
-        int vBatt,
+        double vBatt,
         double vAux,
         double aMot,
         double aShunt);

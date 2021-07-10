@@ -15,7 +15,7 @@ public:
     // transmitts input string via lora
     void sendData(
         int speed,
-        int vBatt,
+        double vBatt,
         double vAux,
         double aMotor,
         double aShunt);
