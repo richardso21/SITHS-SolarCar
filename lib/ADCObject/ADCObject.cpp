@@ -27,13 +27,14 @@ void ADE7912::writeByte(int ss, byte writeTo, byte writeMsg)
     digitalWrite(ss, HIGH);
 }
 
-void ADE7912::init(uint32_t clock, int dReadyPin, int ss1, int ss2)
+void ADE7912::init(SPISettings spiSettings, int dReadyPin, int ss1, int ss2)
 {
     // set pins and settings to private variables
     _dReadyPin = dReadyPin;
     _ss1 = ss1;
     _ss2 = ss2;
-    _spiSettings = &SPISettings(clock, MSBFIRST, SPI_MODE3);
+    _spiSettings = spiSettings;
+    // _spiSettings = &SPISettings(clock, MSBFIRST, SPI_MODE3);
 
     // pin modes for ss
     pinMode(_ss1, OUTPUT);
@@ -48,7 +49,7 @@ void ADE7912::init(uint32_t clock, int dReadyPin, int ss1, int ss2)
 
 void ADE7912::powerUp()
 {
-    beginTransaction(*_spiSettings);
+    beginTransaction(_spiSettings);
 
     bool resetA = true;
     bool resetB = true;
@@ -85,45 +86,43 @@ void ADE7912::powerUp()
 
 void ADE7912::burstReadData(double ADCData[])
 {
-    beginTransaction(*_spiSettings);
+    beginTransaction(_spiSettings);
+
     byte dataA[6];
     byte dataB[6];
     long mBatt, mArr, mMot;
-    double res[3];
+    // double res[3];
 
     // read IWV and V1 from both ADCs
     readBytes(_ss1, IWV, 6, dataA);
     readBytes(_ss2, IWV, 6, dataB);
 
-    // translate arrays of bytes to 24-bit signed longs
-    long mBatt = translateDataBytes(dataA, 0, 3);
-    long mArr = translateDataBytes(dataA, 3, 6);
-    // long mMisc = translateDataBytes(dataB, 0, 3);
-    long mMot = translateDataBytes(dataB, 3, 6);
-
-    // ADCData[0] = resA;
-    // ADCData[1] = resB;
-
     endTransaction();
+
+    // translate arrays of bytes to 24-bit signed longs
+    mBatt = translateDataBytes(dataA, 0, 3);
+    mArr = translateDataBytes(dataA, 3, 6);
+    // long mMisc = translateDataBytes(dataB, 0, 3);
+    mMot = translateDataBytes(dataB, 3, 6);
+
+
+    ADCData[0] = map(mBatt, LRANGE, HRANGE, -V_MAX, V_MAX);
+    ADCData[1] = map(mArr, LRANGE, HRANGE, -C_MAX, C_MAX) / 1000 / SH_RES;
+    ADCData[2] = map(mMot, LRANGE, HRANGE, -C_MAX, C_MAX) / 1000 / SH_RES;
+
 }
 
-long ADE7912::translateDataBytes(byte data[], int begin, int end)
+long ADE7912::translateDataBytes(byte byteArr[], int begin, int end)
 {
     // check if signed byte is a negative
-    bool neg = data[0] & (1 << 7);
+    bool neg = byteArr[begin] & (1 << 7);
 
     long val = 0;
-    // long res;
+    // shift one byte left for next byte
     for (int i = begin; i < end; i++)
-    {
-        // shift one byte left for next byte
-        val = (val << 8) | data[i];
-    }
+        val = (val << 8) | byteArr[i];
     // use two's complement to convert unsigned to signed
     if (neg)
-    {
         val = -(~(val - 1) & 0xFFFFFF);
-        // res = val & 0xFFFFFF;
-    }
     return val;
 }

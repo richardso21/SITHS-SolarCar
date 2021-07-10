@@ -14,7 +14,11 @@
 // misc variables
 #define MAX_TRY 100
 #define READ 0b100
-// #define WRITE 0b000
+#define LRANGE -8388608
+#define HRANGE 8388607
+#define C_MAX 49.27     // max mV from IM/IP
+#define V_MAX 788       // max mV from V1
+#define SH_RES 0.00075
 // registers
 #define STATUS0 (0x9 << 3)
 #define EMI_CTRL (0xE << 3)
@@ -33,7 +37,7 @@ class ADE7912 : public SPIClass
 {
 private:
     int _dReadyPin, _ss1, _ss2;
-    SPISettings *_spiSettings;
+    SPISettings _spiSettings;
 
     // read and return one byte from a register
     byte readByte(int ss, byte readFrom);
@@ -46,7 +50,7 @@ private:
 
 public:
     // start SPI bus for ADC with specificed clock frequency
-    void init(uint32_t clock, int dReadyPin, int ss1, int ss2);
+    void init(SPISettings spiSettings, int dReadyPin, int ss1, int ss2);
 
     // run power-up procedure
     void powerUp();
@@ -55,5 +59,5 @@ public:
     void burstReadData(double ADCData[]);
 
     // translate an array of bytes into long
-    long translateDataBytes(byte data[], int begin, int end);
+    long translateDataBytes(byte byteArr[], int begin, int end);
 };

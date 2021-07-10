@@ -2,7 +2,7 @@
 
 void LoraSerial::sendData(
     int speed,
-    int vBatt,
+    double vBatt,
     double vAux,
     double aMotor,
     double aShunt)
@@ -20,7 +20,7 @@ void LoraSerial::sendData(
     print(",");
     print(speed);
     print(";");
-    print(vBatt);
+    print(vBatt, 1);
     print(";");
     print(vAux, 1);
     print(";");
