@@ -65,6 +65,7 @@ void ADE7912::powerUp()
     // set config for ADC A to have CLKOUT functionality
     writeByte(_ss1, CONFIG, 0b00110001);
 
+    // TODO: writeByte is not setting the byte properly
     Serial.println(readByte(_ss1, CONFIG));
 
     // set EMI_CTRL for ADC A
@@ -85,7 +86,7 @@ void ADE7912::powerUp()
     writeByte(_ss1, LOCK_REG, LOCK_BYTE);
     writeByte(_ss2, LOCK_REG, LOCK_BYTE);
 
-    Serial.println("ADCs Configured!");
+    // Serial.println("ADCs Configured!");
 
     endTransaction();
 }
@@ -103,18 +104,18 @@ void ADE7912::burstReadData(double ADCData[])
     readBytes(_ss1, IWV, 6, dataA);
     readBytes(_ss2, IWV, 6, dataB);
 
-    Serial.print(dataA[0]);
-    Serial.print(" ");
-    Serial.print(dataA[1]);
-    Serial.print(" ");
-    Serial.print(dataA[2]);
-    Serial.print(" ");
-    Serial.print(dataA[3]);
-    Serial.print(" ");
-    Serial.print(dataA[4]);
-    Serial.print(" ");
-    Serial.print(dataA[5]);
-    Serial.print(" ");
+    // Serial.print(dataA[0]);
+    // Serial.print(" ");
+    // Serial.print(dataA[1]);
+    // Serial.print(" ");
+    // Serial.print(dataA[2]);
+    // Serial.print(" ");
+    // Serial.print(dataA[3]);
+    // Serial.print(" ");
+    // Serial.print(dataA[4]);
+    // Serial.print(" ");
+    // Serial.print(dataA[5]);
+    // Serial.print(" ");
 
     endTransaction();
 
@@ -123,6 +124,7 @@ void ADE7912::burstReadData(double ADCData[])
     mArr = translateDataBytes(dataA, 3, 6);
     // long mMisc = translateDataBytes(dataB, 0, 3);
     mMot = translateDataBytes(dataB, 3, 6);
+    // TODO: screwed up byte order (i.e. mBatt <-> mArr)
 
 
     ADCData[0] = map(mBatt, LRANGE, HRANGE, -V_MAX, V_MAX);
