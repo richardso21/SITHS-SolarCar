@@ -38,7 +38,7 @@ void setup()
 
 void loop()
 {
-    while (gpsSerial.available())
+    /* while (gpsSerial.available())
         if (gpsSerial.GPSencode())
             mainFunc(true);
     // if gps is missing / not encoding stuff
@@ -48,7 +48,9 @@ void loop()
         // check again after 10 seconds
         while ((millis() - _lastGPSCheck) < 10000)
             mainFunc(false);
-    }
+    } */
+    mainFunc(false);
+    
 }
 
 int mainFunc(bool gpsEnabled)
@@ -59,7 +61,7 @@ int mainFunc(bool gpsEnabled)
     Serial.println(ADCData[1]);
     Serial.println(ADCData[2]);
     // measure aux voltage (arduino's own voltage)
-    double vAux = (double)analogRead(A0) * (V_REF / 1023.0) * VDIV_RATIO;
+  /*   double vAux = (double)analogRead(A0) * (V_REF / 1023.0) * VDIV_RATIO;
 
     time_t currentTime;
     int speed;
@@ -99,7 +101,7 @@ int mainFunc(bool gpsEnabled)
         _lastSend = millis();
         lora.sendData(speed, ADCData[0], vAux, ADCData[1], ADCData[2]);
     }
-
+ */
     delay(1000);
-    return 0;
+    return 0; 
 }
