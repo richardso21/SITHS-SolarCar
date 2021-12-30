@@ -41,7 +41,7 @@ void ADE7912::init(SPISettings spiSettings, int dReadyPin, int ss1, int ss2)
     digitalWrite(_ss1, HIGH);
     pinMode(_ss2, OUTPUT);
     digitalWrite(_ss2, HIGH);
-    // begin();
+    begin();
 
     // begin power up procedure
     powerUp();
@@ -55,7 +55,11 @@ void ADE7912::powerUp()
     bool resetB = true;
     // see when ADC A is done resetting
     while (resetA)
+    {
         resetA = readByte(_ss1, STATUS0) & 1;
+        Serial.println(resetA);
+        delay(20);
+    }
 
     // unlock config register
     writeByte(_ss1, LOCK_REG, UNLOCK_BYTE);
@@ -73,7 +77,11 @@ void ADE7912::powerUp()
 
     // repeat for ADC B
     while (resetB)
+    {
         resetB = readByte(_ss2, STATUS0) & 1;
+        Serial.println(resetB);
+        delay(20);
+    }
     writeByte(_ss2, LOCK_REG, UNLOCK_BYTE);
     writeByte(_ss2, CONFIG, 0b00110000);
     writeByte(_ss2, EMI_CTRL, EMI_B);
@@ -126,11 +134,9 @@ void ADE7912::burstReadData(double ADCData[])
     mMot = translateDataBytes(dataB, 3, 6);
     // TODO: screwed up byte order (i.e. mBatt <-> mArr)
 
-
     ADCData[0] = map(mBatt, LRANGE, HRANGE, -V_MAX, V_MAX);
     ADCData[1] = map(mArr, LRANGE, HRANGE, -C_MAX, C_MAX) / 1000 / SH_RES;
     ADCData[2] = map(mMot, LRANGE, HRANGE, -C_MAX, C_MAX) / 1000 / SH_RES;
-
 }
 
 long ADE7912::translateDataBytes(byte byteArr[], int begin, int end)

@@ -9,9 +9,9 @@
 #define R2 1
 #define VDIV_RATIO (R1 + R2) / R2
 
-GPSSerial gpsSerial;
-LoraSerial lora(2, 3);
-LCDObject lcd(0x27, 20, 4);
+// GPSSerial gpsSerial;
+// LoraSerial lora(2, 3);
+// LCDObject lcd(0x27, 20, 4);
 ADE7912 adc;
 
 unsigned long _lastSend = 0;
@@ -23,16 +23,17 @@ void setup()
 {
     // initiate serial coms
     Serial.begin(9600);
-    lora.begin(9600);
-    gpsSerial.begin(9600);
-    // initialize lcd
-    lcd.start(true);
-    // set reference voltage to internal 1.1v
-    analogReference(INTERNAL);
-    analogRead(A0);
+    // >>> COMMENT BELOW IF TESTING ADC >>>
+    // lora.begin(9600);
+    // gpsSerial.begin(9600);
+    // // initialize lcd
+    // lcd.start(true);
+    // // set reference voltage to internal 1.1v
+    // analogReference(INTERNAL);
+    // analogRead(A0);
+    // <<< COMMENT ABOVE IF TESTING ADC <<<
 
     SPISettings spiSettings(250000, MSBFIRST, SPI_MODE3);
-
     adc.init(spiSettings, DREADY, ADCA, ADCB);
 }
 
@@ -49,7 +50,9 @@ void loop()
         while ((millis() - _lastGPSCheck) < 10000)
             mainFunc(false);
     } */
+    // Serial.println("testing");
     mainFunc(false);
+    delay(1000);
     
 }
 
@@ -102,6 +105,5 @@ int mainFunc(bool gpsEnabled)
         lora.sendData(speed, ADCData[0], vAux, ADCData[1], ADCData[2]);
     }
  */
-    delay(1000);
     return 0; 
 }
